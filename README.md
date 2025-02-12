@@ -9,3 +9,10 @@ Repository Data Analisis Python Dicoding  menggunkan **Streamlit** <img src="htt
 Pada proyek akhir ini dipilih dataset E-Commerce Public Dataset sebagai data yang akan dianalisis dan di deploy menggunakan streamlit.
 
 ## Clone repository
+
+https://github.com/Kerleta/Analisis-Data.git
+
+## Run streamlit app
+
+cd Dashboard
+streamlit run dashboard.py
