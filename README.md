@@ -16,3 +16,6 @@ https://github.com/Kerleta/Analisis-Data.git
 
 cd Dashboard
 streamlit run dashboard.py
+
+## Website
+https://stilllearningdata.streamlit.app/
