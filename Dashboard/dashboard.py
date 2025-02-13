@@ -133,19 +133,27 @@ st.pyplot(fig)
 
 #Best and worst product
 st.subheader("Best and Worst Product by Number of Sales")
- 
+
 fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(35, 15))
- 
+
+# Definisi colors sebelum digunakan
 colors = ["#1aa3e9", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
- 
-sns.barplot(x="count", y="product", hue="product", data=sum_order_items_df.head(5), palette=colors, ax=ax[0])
+
+colors_dict = {
+    "credit_card": "#1aa3e9",
+    "boleto": "#D3D3D3",
+    "debit_card": "#D3D3D3",
+    "voucher": "#D3D3D3"
+}
+
+sns.barplot(x="count", y="product", data=sum_order_items_df.head(5), palette=colors, ax=ax[0])
 ax[0].set_ylabel(None)
 ax[0].set_xlabel("Number of Sales", fontsize=30)
 ax[0].set_title("Best Product", loc="center", fontsize=50)
 ax[0].tick_params(axis='y', labelsize=35)
 ax[0].tick_params(axis='x', labelsize=30)
 
-sns.barplot(x="count", y="product", hue="product", data=sum_order_items_df.sort_values(by="count", ascending=True).head(5), palette=colors, ax=ax[1])
+sns.barplot(x="count", y="product", data=sum_order_items_df.sort_values(by="count", ascending=True).head(5), palette=colors, ax=ax[1])
 ax[1].set_ylabel(None)
 ax[1].set_xlabel("Number of Sales", fontsize=30)
 ax[1].invert_xaxis()
@@ -154,42 +162,37 @@ ax[1].yaxis.tick_right()
 ax[1].set_title("Worst Product", loc="center", fontsize=50)
 ax[1].tick_params(axis='y', labelsize=35)
 ax[1].tick_params(axis='x', labelsize=30)
- 
+
 st.pyplot(fig)
- 
+
 # Payment Type
 st.subheader("Payment Type")
 fig, ax = plt.subplots(figsize=(20, 10))
+
+colors_dict = {
+    "credit_card": "#1aa3e9",
+    "boleto": "#D3D3D3",
+    "debit_card": "#D3D3D3",
+    "voucher": "#D3D3D3"
+}
+
+by_payment_type_df = by_payment_type_df.dropna(subset=["payment_type_x"])
+valid_categories = [ptype for ptype in by_payment_type_df["payment_type_x"].unique() if ptype in colors_dict]
+palette_colors = [colors_dict[ptype] for ptype in valid_categories]
+
 sns.barplot(
-    y="customer_count", 
+    y="customer_count",
     x="payment_type_x",
-    hue="payment_type_x",
-    data=by_payment_type_df,
-    palette=colors,
+    data=by_payment_type_df[by_payment_type_df["payment_type_x"].isin(valid_categories)], 
+    palette=palette_colors, 
     ax=ax
 )
+
 ax.set_title("Number of Customer by Payment Type", loc="center", fontsize=50)
 ax.set_ylabel(None)
 ax.set_xlabel(None)
 ax.tick_params(axis='x', labelsize=35)
 ax.tick_params(axis='y', labelsize=30)
-st.pyplot(fig)
-
-#Trend Category
-st.subheader("Tren Penjualan Produk per Bulan (Top 10 Kategori)")
-
-# Plot grafik menggunakan Matplotlib
-fig, ax = plt.subplots(figsize=(16, 6))
-
-# Loop untuk setiap kategori dan plot trennya
-for category in category_trend_df['product_category_name_english'].unique():
-    data = category_trend_df[category_trend_df['product_category_name_english'] == category]
-    ax.plot(data['order_purchase_timestamp'], data['order_id'], marker='o', label=category)
-
-ax.set_xlabel("Tahun/Bulan")
-ax.set_ylabel("Jumlah Pesanan")
-ax.set_title("Tren Penjualan Produk per Bulan (Top 10 Kategori)")
-ax.legend(title="Kategori Produk", bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.xticks(rotation=45)
 
 st.pyplot(fig)
+
