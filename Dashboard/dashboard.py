@@ -1,3 +1,4 @@
+import os
 import gdown
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -10,7 +11,12 @@ file_id = "1j2oACyrWAILw8iQbdlkHXp0vmrkNqyFi"
 url = f"https://drive.google.com/uc?id={file_id}"
 
 output = "all_data.csv"
-gdown.download(url, output, quiet=False)
+
+# Cek apakah file sudah ada sebelum mengunduh
+if not os.path.exists(output):
+    gdown.download(url, output, quiet=False)
+else:
+    print("File sudah ada, tidak perlu mengunduh ulang.")
 
 sns.set(style='dark')
 
