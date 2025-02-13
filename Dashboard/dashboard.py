@@ -1,8 +1,16 @@
+import gdown
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 from babel.numbers import format_currency
+
+# Link file Google Drive
+file_id = "1j2oACyrWAILw8iQbdlkHXp0vmrkNqyFi"
+url = f"https://drive.google.com/uc?id={file_id}"
+
+output = "all_data.csv"
+gdown.download(url, output, quiet=False)
 
 sns.set(style='dark')
 
@@ -54,7 +62,7 @@ def load_data():
     df = pd.read_csv("all_data.csv")
     return df
 
-all_df = load_data()
+all_df = pd.read_csv(output)
 datetime_columns = ["shipping_limit_date", "review_creation_date","review_answer_timestamp","order_purchase_timestamp","order_approved_at","order_delivered_carrier_date","order_delivered_customer_date","order_estimated_delivery_date"]
 all_df.sort_values(by="order_approved_at", inplace=True)
 all_df.reset_index(drop=True, inplace=True)
@@ -167,11 +175,11 @@ st.subheader("Tren Penjualan Produk per Bulan (Top 10 Kategori)")
 # Plot grafik menggunakan Matplotlib
 fig, ax = plt.subplots(figsize=(16, 6))
 
+# Loop untuk setiap kategori dan plot trennya
 for category in category_trend_df['product_category_name_english'].unique():
     data = category_trend_df[category_trend_df['product_category_name_english'] == category]
     ax.plot(data['order_purchase_timestamp'], data['order_id'], marker='o', label=category)
 
-# Format tampilan grafik
 ax.set_xlabel("Tahun/Bulan")
 ax.set_ylabel("Jumlah Pesanan")
 ax.set_title("Tren Penjualan Produk per Bulan (Top 10 Kategori)")
