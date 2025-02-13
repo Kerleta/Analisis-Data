@@ -184,7 +184,7 @@ sns.barplot(
     y="customer_count",
     x="payment_type_x",
     data=by_payment_type_df[by_payment_type_df["payment_type_x"].isin(valid_categories)], 
-    palette=palette_colors, 
+    palette=palette_colors,  # Pastikan ini berupa list, bukan Series
     ax=ax
 )
 
@@ -196,3 +196,17 @@ ax.tick_params(axis='y', labelsize=30)
 
 st.pyplot(fig)
 
+st.subheader("Tren Penjualan Produk per Bulan (Top 10 Kategori)")
+
+fig, ax = plt.subplots(figsize=(16, 6))
+
+for category in category_trend_df['product_category_name_english'].unique():
+    category_data = category_trend_df[category_trend_df['product_category_name_english'] == category]
+    ax.plot(category_data['order_purchase_timestamp'], category_data['order_id'], marker='o', label=category)
+
+ax.set_xlabel("Tahun/Bulan")
+ax.set_ylabel("Jumlah Pesanan")
+ax.legend(title="Kategori Produk", bbox_to_anchor=(1, 1))
+ax.set_xticklabels(category_trend_df['order_purchase_timestamp'].dt.strftime('%Y-%m'), rotation=45)
+
+st.pyplot(fig)
