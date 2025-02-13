@@ -10,8 +10,8 @@ class Visualization:
     def __init__(self, df):
         self.df = df
 
-    def create_monthly_orders_df(df):
-        monthly_orders_df = df.df.resample(rule='MS', on="order_purchase_timestamp").agg({
+    def create_monthly_orders_df(self):
+        monthly_orders_df = self.df.resample(rule='MS', on="order_purchase_timestamp").agg({
             "order_id": "nunique"
         }).reset_index()
     
@@ -22,29 +22,42 @@ class Visualization:
     
         return monthly_orders_df
 
-    def create_sum_order_items_df(df):
-        sum_order_items_df = df.df.groupby("product_category_name_english")["product_id"].count().reset_index().sort_values(by="product_id", ascending=False)
+    def create_sum_order_items_df(self):
+        sum_order_items_df = self.df.groupby("product_category_name_english")["product_id"].count().reset_index().sort_values(by="product_id", ascending=False)
         sum_order_items_df = sum_order_items_df.rename(columns={"product_id": "count", "product_category_name_english": "product"})
         return sum_order_items_df
     
-    def create_bypaymenttype_df(df):
-        bypaymenttype_df = df.df.groupby(by="payment_type_x").order_id.nunique().reset_index()
+    def create_bypaymenttype_df(self):
+        bypaymenttype_df = self.df.groupby(by="payment_type_x").order_id.nunique().reset_index()
         bypaymenttype_df.rename(columns={
             "order_id": "customer_count"
         }, inplace=True)
         
         return bypaymenttype_df
+    
+    def create_category_trend_df(self):
+        df = self.df.copy()  # Salin agar tidak mengubah df asli
+        df['order_purchase_timestamp'] = pd.to_datetime(df['order_purchase_timestamp'])
+        df.set_index('order_purchase_timestamp', inplace=True)
+    
+        category_trend_df = df.groupby([pd.Grouper(freq='M'), 'product_category_name_english'])['order_id'].count().reset_index()
+    
+        top_categories = df['product_category_name_english'].value_counts().nlargest(10).index
+        category_trend_df = category_trend_df[category_trend_df['product_category_name_english'].isin(top_categories)]
+    
+        return category_trend_df
+
 
 # Membaca dataset dengan cache agar lebih efisien
 @st.cache_data
 def load_data():
-    df = pd.read_csv(r"D:\Noding\Dashboard\all_data.csv")
+    df = pd.read_csv("all_data.csv")
     return df
 
 all_df = load_data()
 datetime_columns = ["shipping_limit_date", "review_creation_date","review_answer_timestamp","order_purchase_timestamp","order_approved_at","order_delivered_carrier_date","order_delivered_customer_date","order_estimated_delivery_date"]
 all_df.sort_values(by="order_approved_at", inplace=True)
-all_df.reset_index(inplace=True)
+all_df.reset_index(drop=True, inplace=True)
 
 for column in datetime_columns:
    all_df[column] = pd.to_datetime(all_df[column], format="%Y-%m-%d %H:%M:%S", errors='coerce')
@@ -70,11 +83,12 @@ main_df = all_df[
     (all_df["order_approved_at"] <= pd.to_datetime(end_date))
 ]
 
+# Inisialisasi objek Visualization dengan main_df
 vis = Visualization(main_df)
 monthly_order_df = vis.create_monthly_orders_df()
 sum_order_items_df = vis.create_sum_order_items_df()
 by_payment_type_df = vis.create_bypaymenttype_df()
-
+category_trend_df = vis.create_category_trend_df()
 
 st.header('Proyek Analisis Data :sparkles:')
 st.subheader('Monthly Orders')
@@ -129,11 +143,6 @@ ax[1].tick_params(axis='x', labelsize=30)
  
 st.pyplot(fig)
  
- 
-by_payment_type_df = by_payment_type_df.sort_values(by="customer_count", ascending=True)
-colors = ["#D3D3D3", "#D3D3D3", "#D3D3D3", "#72BCD4"]
-
-
 # Payment Type
 st.subheader("Payment Type")
 fig, ax = plt.subplots(figsize=(20, 10))
@@ -150,4 +159,23 @@ ax.set_ylabel(None)
 ax.set_xlabel(None)
 ax.tick_params(axis='x', labelsize=35)
 ax.tick_params(axis='y', labelsize=30)
+st.pyplot(fig)
+
+#Trend Category
+st.subheader("Tren Penjualan Produk per Bulan (Top 10 Kategori)")
+
+# Plot grafik menggunakan Matplotlib
+fig, ax = plt.subplots(figsize=(16, 6))
+
+for category in category_trend_df['product_category_name_english'].unique():
+    data = category_trend_df[category_trend_df['product_category_name_english'] == category]
+    ax.plot(data['order_purchase_timestamp'], data['order_id'], marker='o', label=category)
+
+# Format tampilan grafik
+ax.set_xlabel("Tahun/Bulan")
+ax.set_ylabel("Jumlah Pesanan")
+ax.set_title("Tren Penjualan Produk per Bulan (Top 10 Kategori)")
+ax.legend(title="Kategori Produk", bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.xticks(rotation=45)
+
 st.pyplot(fig)
