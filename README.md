@@ -6,7 +6,7 @@ Repository Data Analisis Python Dicoding  menggunkan **Streamlit** <img src="htt
 
 ## Deskripsi
 
-Pada proyek akhir ini dipilih dataset E-Commerce Public Dataset sebagai data yang akan dianalisis dan di deploy menggunakan streamlit.
+Pada proyek akhir ini dipilih dataset E-Commerce Public Dataset sebagai data yang akan dianalisis dan di-deploy menggunakan streamlit.
 
 ## Clone repository
 
